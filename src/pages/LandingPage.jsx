@@ -600,18 +600,6 @@ function LandingPage() {
           </div>
         </section>
 
-        <section className="testimonio">
-          <div className="container testimonio__inner">
-            <Reveal>
-              <p className="testimonio__text">
-                <strong>“Creemos</strong> en la expresión popular y{" "}
-                <strong>en la voz de todxs, en la lucha</strong> de quienes
-                han sido excluidos”
-              </p>
-            </Reveal>
-          </div>
-        </section>
-
         <section id="nosotros" className="nosotros">
           <div className="container">
             <Reveal>
@@ -688,6 +676,18 @@ function LandingPage() {
                 </div>
               </Reveal>
             </div>
+          </div>
+        </section>
+
+        <section className="testimonio">
+          <div className="container testimonio__inner">
+            <Reveal>
+              <p className="testimonio__text">
+                <strong>“Creemos</strong> en la expresión popular y{" "}
+                <strong>en la voz de todxs, en la lucha</strong> de quienes
+                han sido excluidos”
+              </p>
+            </Reveal>
           </div>
         </section>
       </main>
