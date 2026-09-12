@@ -326,6 +326,64 @@
   height: 90px;
 }
 
+/* ---------- Nosotros ---------- */
+.nosotros {
+  padding-block: 80px 60px;
+  text-align: center;
+}
+
+.nosotros__historia {
+  max-width: 760px;
+  margin: 0 auto 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.nosotros__historia p {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.nosotros__historia strong {
+  color: var(--orange-dark);
+  font-weight: 800;
+}
+
+.nosotros__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.nosotros__card {
+  background: var(--white);
+  border-radius: 24px;
+  padding: 30px 28px;
+  box-shadow: 0 10px 24px -16px rgba(0, 0, 0, 0.2);
+}
+
+.nosotros__card h3 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-size: 1.3rem;
+  color: var(--orange);
+  margin-bottom: 12px;
+}
+
+.nosotros__card p {
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
 /* ---------- Impacto ---------- */
 .impacto {
   padding-block: 80px 60px;
@@ -475,6 +533,7 @@
   box-shadow: 0 16px 30px -18px rgba(0, 0, 0, 0.35);
   background: var(--white);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
 }
 
 .pilar-card:hover {
@@ -483,8 +542,71 @@
 }
 
 .pilar-card__photo {
+  position: relative;
   aspect-ratio: 16 / 10;
   overflow: hidden;
+}
+
+.pilar-card__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px;
+  background: rgba(58, 44, 34, 0.88);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.pilar-card:hover .pilar-card__overlay,
+.pilar-card.is-open .pilar-card__overlay {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.pilar-card__overlay ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pilar-card__overlay li {
+  position: relative;
+  padding-left: 16px;
+  color: var(--white);
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.pilar-card__overlay li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 7px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--yellow);
+}
+
+.pilar-card__overlay .btn {
+  align-self: flex-start;
+}
+
+.pilar-card__hint {
+  display: block;
+  margin-top: 10px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .pilar-card__photo img {
@@ -536,17 +658,25 @@
 .pilar-card--green .pilar-card__body { background: var(--green); }
 .pilar-card--blue .pilar-card__body { background: var(--blue); }
 
-.bolsones-banner {
+.info-banner {
   display: flex;
   align-items: center;
   gap: 24px;
   flex-wrap: wrap;
   justify-content: space-between;
-  background: var(--red);
   color: var(--white);
   border-radius: 26px;
   padding: 30px 34px;
   text-align: left;
+  margin-top: 20px;
+}
+
+.info-banner--red {
+  background: var(--red);
+}
+
+.info-banner--purple {
+  background: var(--purple);
 }
 
 @keyframes pulse {
@@ -559,15 +689,21 @@
   }
 }
 
-.bolsones-banner__icon {
+.info-banner__icon {
   width: 48px;
   height: 48px;
   object-fit: contain;
   filter: brightness(0) invert(1);
   animation: pulse 2.2s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
-.bolsones-banner > div {
+.info-banner__icon--text {
+  font-size: 2.4rem;
+  display: flex;
+}
+
+.info-banner > div {
   flex: 1;
   min-width: 220px;
   display: flex;
@@ -575,12 +711,12 @@
   gap: 20px;
 }
 
-.bolsones-banner h3 {
+.info-banner h3 {
   font-size: 1.25rem;
   margin-bottom: 6px;
 }
 
-.bolsones-banner p {
+.info-banner p {
   font-weight: 600;
   font-size: 0.92rem;
   color: rgba(255, 255, 255, 0.9);
@@ -773,6 +909,12 @@
   font-weight: 600;
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.9);
+  transition: color 0.2s ease;
+}
+
+.footer-col a:hover {
+  color: var(--white);
+  text-decoration: underline;
 }
 
 .footer-col li {
@@ -783,6 +925,12 @@
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.9);
   line-height: 1.4;
+}
+
+.footer-col li a {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
 }
 
 .footer-col li svg {
@@ -863,7 +1011,7 @@
     font-weight: 700;
   }
 
-  .bolsones-banner {
+  .info-banner {
     flex-direction: column;
     align-items: flex-start;
   }

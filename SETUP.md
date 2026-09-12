@@ -122,6 +122,58 @@ VITE_SUPABASE_URL=el Project URL que copiaste
 VITE_SUPABASE_PUBLISHABLE_KEY=la Publishable key (sb_publishable_...)
 ```
 
+### 2.5 Tabla para la portada (hero) editable
+
+Esto habilita que desde el panel se pueda cambiar la imagen, el texto y el
+color de fondo de la portada principal (el cuadrado de "Transformar la
+realidad desde el barrio"), por ejemplo para subir una campaña temporal
+(un festival, etc.).
+
+1. **SQL Editor → New query**, pegá esto y tocá **Run**:
+
+```sql
+-- Tabla de la portada (hero) — una sola fila con id fijo 'main'
+create table if not exists hero_campaign (
+  id text primary key,
+  active boolean not null default false,
+  kicker text,
+  headline text,
+  body text,
+  background text,
+  image_url text,
+  updated_at timestamptz not null default now()
+);
+
+alter table hero_campaign enable row level security;
+
+grant select on hero_campaign to anon;
+grant select, insert, update, delete on hero_campaign to authenticated;
+
+create policy "Public can read hero campaign"
+on hero_campaign for select
+to anon, authenticated
+using (true);
+
+create policy "Authenticated can insert hero campaign"
+on hero_campaign for insert
+to authenticated
+with check (true);
+
+create policy "Authenticated can update hero campaign"
+on hero_campaign for update
+to authenticated
+using (true);
+
+create policy "Authenticated can delete hero campaign"
+on hero_campaign for delete
+to authenticated
+using (true);
+```
+
+Las fotos de la portada se guardan en el mismo bucket `post-files` que las
+de los blogs (dentro de una carpeta `hero/`), así que no hace falta crear
+un bucket nuevo ni políticas de storage adicionales.
+
 ## 3. Agregar las variables en Vercel
 
 Cuando hagamos el deploy: Vercel → tu proyecto → **Settings → Environment Variables** → cargá las 3 variables (`VITE_CLERK_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) para Production, Preview y Development. La Secret key de Supabase y la Secret key de Clerk no van en Vercel — no las necesita el sitio.
