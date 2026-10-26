@@ -32,7 +32,11 @@ import { DonationModal } from "../components/DonationModal";
 import { supabase } from "../lib/supabaseClient";
 import { getPosts } from "../lib/posts";
 import { getHeroCampaign } from "../lib/hero";
-import { getHeroBackgroundCss } from "../lib/heroBackgrounds";
+import { getSiteStats, DEFAULT_STATS } from "../lib/stats";
+import {
+  getHeroBackgroundCss,
+  DEFAULT_HERO_GRADIENT,
+} from "../lib/heroBackgrounds";
 import { formatPostDate } from "../lib/formatDate";
 
 import "../App.css";
@@ -61,13 +65,7 @@ const NAV_LINKS = [
   { href: "#contacto", label: "Contacto" },
 ];
 
-const STATS = [
-  { value: "+140", label: "familias acompañadas", color: "red" },
-  { value: "+12", label: "barrios alcanzados", color: "green" },
-  { value: "+13", label: "talleres activos", color: "yellow" },
-  { value: "+30", label: "voluntarios sumados", color: "purple" },
-  { value: "+50", label: "bolsones entregados", color: "blue" },
-];
+const STAT_COLORS = ["red", "green", "yellow", "purple", "blue"];
 
 const PILARES = [
   {
@@ -193,26 +191,6 @@ function PilarCard({ icon, title, text, photo, color, activities, whatsapp }) {
     >
       <div className="pilar-card__photo">
         <img src={photo} alt="" loading="lazy" />
-        {activities && (
-          <div className="pilar-card__overlay">
-            <ul>
-              {activities.map((activity) => (
-                <li key={activity}>{activity}</li>
-              ))}
-            </ul>
-            {whatsapp && (
-              <a
-                href={whatsapp.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn btn--primary btn--sm"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {whatsapp.label}
-              </a>
-            )}
-          </div>
-        )}
       </div>
       <div className="pilar-card__body">
         <img src={icon} alt="" className="pilar-card__icon" />
@@ -222,6 +200,27 @@ function PilarCard({ icon, title, text, photo, color, activities, whatsapp }) {
           <span className="pilar-card__hint">Ver actividades →</span>
         )}
       </div>
+      {activities && (
+        <div className="pilar-card__overlay">
+          <h4>{title}</h4>
+          <ul>
+            {activities.map((activity) => (
+              <li key={activity}>{activity}</li>
+            ))}
+          </ul>
+          {whatsapp && (
+            <a
+              href={whatsapp.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn--primary btn--sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {whatsapp.label}
+            </a>
+          )}
+        </div>
+      )}
     </article>
   );
 }
@@ -291,7 +290,9 @@ function InformeSection() {
 
 function Hero({ campaign }) {
   const isCampaign = Boolean(campaign?.active);
-  const background = getHeroBackgroundCss(campaign?.background);
+  const background = isCampaign
+    ? getHeroBackgroundCss(campaign.background)
+    : DEFAULT_HERO_GRADIENT;
   const kicker =
     isCampaign && campaign.kicker
       ? campaign.kicker
@@ -376,12 +377,20 @@ function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [donateOpen, setDonateOpen] = useState(false);
   const [heroCampaign, setHeroCampaign] = useState(null);
+  const [stats, setStats] = useState(DEFAULT_STATS);
 
   useEffect(() => {
     let cancelled = false;
     getHeroCampaign(supabase)
       .then((data) => {
         if (!cancelled) setHeroCampaign(data);
+      })
+      .catch(() => {});
+    getSiteStats(supabase)
+      .then((items) => {
+        if (!cancelled && Array.isArray(items) && items.length > 0) {
+          setStats(items);
+        }
       })
       .catch(() => {});
     return () => {
@@ -476,8 +485,13 @@ function LandingPage() {
               <h2 className="section-title">Lo que construimos juntos</h2>
             </Reveal>
             <div className="stats-grid">
-              {STATS.map((s, i) => (
-                <StatBadge key={s.label} {...s} delay={i * 90} />
+              {stats.map((s, i) => (
+                <StatBadge
+                  key={i}
+                  {...s}
+                  color={STAT_COLORS[i % STAT_COLORS.length]}
+                  delay={i * 90}
+                />
               ))}
             </div>
           </div>

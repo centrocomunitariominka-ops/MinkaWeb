@@ -61,6 +61,25 @@
   margin-top: 32px;
 }
 
+.admin-dashboard__stats {
+  margin-top: 32px;
+  max-width: 560px;
+}
+
+.admin-form__row {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-form__row .admin-form__field {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-form__row .admin-form__field--number {
+  flex: 0 0 110px;
+}
+
 .admin-hero-editor {
   display: grid;
   grid-template-columns: 1fr 1fr;

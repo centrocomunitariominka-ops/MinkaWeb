@@ -10,7 +10,13 @@ import { getPosts } from "../lib/posts";
 import { createPost, deletePost, updatePost } from "../lib/adminPosts";
 import { getHeroCampaign } from "../lib/hero";
 import { saveHeroCampaign } from "../lib/adminHero";
-import { DEFAULT_HERO_BACKGROUND, getHeroBackgroundCss } from "../lib/heroBackgrounds";
+import { getSiteStats, DEFAULT_STATS } from "../lib/stats";
+import { saveSiteStats } from "../lib/adminStats";
+import {
+  DEFAULT_HERO_BACKGROUND,
+  DEFAULT_HERO_GRADIENT,
+  getHeroBackgroundCss,
+} from "../lib/heroBackgrounds";
 import { formatPostDate } from "../lib/formatDate";
 import { RichTextEditor } from "../components/RichTextEditor";
 import "../App.css";
@@ -33,7 +39,9 @@ const DEFAULT_HERO_BODY =
 
 function HeroPreview({ form, imageUrl }) {
   const isCampaign = form.active;
-  const background = getHeroBackgroundCss(form.background);
+  const background = isCampaign
+    ? getHeroBackgroundCss(form.background)
+    : DEFAULT_HERO_GRADIENT;
   const kicker = isCampaign && form.kicker ? form.kicker : DEFAULT_HERO_KICKER;
   const headline =
     isCampaign && form.headline ? form.headline : DEFAULT_HERO_HEADLINE;
@@ -182,6 +190,66 @@ function HeroForm({ initial, onSubmit, saving }) {
   );
 }
 
+function StatsForm({ initial, onSubmit, saving }) {
+  const [items, setItems] = useState(DEFAULT_STATS);
+
+  useEffect(() => {
+    if (initial) setItems(initial);
+  }, [initial]);
+
+  function update(index, field, value) {
+    setItems((list) =>
+      list.map((item, i) => (i === index ? { ...item, [field]: value } : item))
+    );
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    onSubmit(items);
+  }
+
+  return (
+    <form className="admin-form" onSubmit={handleSubmit}>
+      <h3>Números de &ldquo;Lo que construimos juntos&rdquo;</h3>
+      <p className="admin-form__hint">
+        Cambiá los 5 números que se muestran en la página principal. Podés
+        escribir el número con el signo, por ejemplo +150.
+      </p>
+
+      {items.map((item, i) => (
+        <div className="admin-form__row" key={i}>
+          <label className="admin-form__field admin-form__field--number">
+            <span>Número</span>
+            <input
+              type="text"
+              required
+              pattern=".*[0-9].*"
+              title="Tiene que incluir al menos un número"
+              value={item.value}
+              onChange={(e) => update(i, "value", e.target.value)}
+            />
+          </label>
+          <label className="admin-form__field">
+            <span>Texto</span>
+            <input
+              type="text"
+              required
+              value={item.label}
+              onChange={(e) => update(i, "label", e.target.value)}
+            />
+          </label>
+        </div>
+      ))}
+
+      <div className="admin-form__actions">
+        <button type="submit" className="btn btn--primary" disabled={saving}>
+          {saving ? "Guardando..." : "Guardar números"}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 function PostForm({ initial, onSubmit, onCancel, saving }) {
   const [form, setForm] = useState(initial ?? EMPTY_FORM);
   const [imageFile, setImageFile] = useState(null);
@@ -290,10 +358,13 @@ function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [heroCampaign, setHeroCampaign] = useState(null);
   const [savingHero, setSavingHero] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [savingStats, setSavingStats] = useState(false);
 
   useEffect(() => {
     refreshPosts();
     refreshHero();
+    refreshStats();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -303,6 +374,32 @@ function Dashboard() {
     } catch (err) {
       console.error(err);
       setHeroCampaign(EMPTY_HERO_FORM);
+    }
+  }
+
+  async function refreshStats() {
+    try {
+      setStats((await getSiteStats(supabase)) ?? DEFAULT_STATS);
+    } catch (err) {
+      console.error(err);
+      setStats(DEFAULT_STATS);
+    }
+  }
+
+  async function handleStatsSubmit(items) {
+    setSavingStats(true);
+    try {
+      await saveSiteStats(supabase, items);
+      await refreshStats();
+      alert("Números guardados.");
+    } catch (err) {
+      console.error(err);
+      alert(
+        "Ocurrió un error al guardar los números: " +
+          [err.message, err.hint, err.details].filter(Boolean).join("\n")
+      );
+    } finally {
+      setSavingStats(false);
     }
   }
 
@@ -394,6 +491,14 @@ function Dashboard() {
         onSubmit={handleHeroSubmit}
         saving={savingHero}
       />
+
+      <div className="admin-dashboard__stats">
+        <StatsForm
+          initial={stats}
+          onSubmit={handleStatsSubmit}
+          saving={savingStats}
+        />
+      </div>
 
       <div className="admin-dashboard__grid">
         <PostForm

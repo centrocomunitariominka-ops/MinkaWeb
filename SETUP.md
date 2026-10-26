@@ -174,6 +174,44 @@ Las fotos de la portada se guardan en el mismo bucket `post-files` que las
 de los blogs (dentro de una carpeta `hero/`), así que no hace falta crear
 un bucket nuevo ni políticas de storage adicionales.
 
+### 2.6 Tabla para los números de "Lo que construimos juntos"
+
+Permite cambiar desde el panel los 5 números de la sección de impacto.
+**SQL Editor → New query**, pegá esto y tocá **Run**:
+
+```sql
+create table if not exists site_stats (
+  id text primary key,
+  items jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table site_stats enable row level security;
+
+grant select on site_stats to anon;
+grant select, insert, update, delete on site_stats to authenticated;
+
+create policy "Public can read site stats"
+on site_stats for select
+to anon, authenticated
+using (true);
+
+create policy "Authenticated can insert site stats"
+on site_stats for insert
+to authenticated
+with check (true);
+
+create policy "Authenticated can update site stats"
+on site_stats for update
+to authenticated
+using (true);
+
+create policy "Authenticated can delete site stats"
+on site_stats for delete
+to authenticated
+using (true);
+```
+
 ## 3. Agregar las variables en Vercel
 
 Cuando hagamos el deploy: Vercel → tu proyecto → **Settings → Environment Variables** → cargá las 3 variables (`VITE_CLERK_PUBLISHABLE_KEY`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) para Production, Preview y Development. La Secret key de Supabase y la Secret key de Clerk no van en Vercel — no las necesita el sitio.
